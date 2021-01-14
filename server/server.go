@@ -15,11 +15,11 @@ type Server struct {
 	name     string
 }
 
-func New(db string) *Server {
+func New(db, dir string) *Server {
 	var storage storage.DB
 	switch db {
 	case "rocksdb":
-		storage = rocksdb.New("")
+		storage = rocksdb.New(dir)
 		break
 
 	case "syncmap":

@@ -27,7 +27,7 @@ func main() {
 		log.Fatalln("dir is needed when using rocksdb mode")
 	}
 
-	server := server.New(*db)
+	server := server.New(*db, *dir)
 	if err := server.Start(*port, memberList); err != nil {
 		log.Fatalln(err)
 	}
