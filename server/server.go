@@ -6,13 +6,15 @@ import (
 	"github.com/qichengzx/m2/storage/rocksdb"
 	"github.com/qichengzx/m2/storage/syncmap"
 	"log"
+	"runtime"
 	"strconv"
 	"sync"
 )
 
 type Server struct {
-	delegate *delegate
-	name     string
+	delegate      *delegate
+	name          string
+	broadcastChan chan *memberlistBroadcast
 }
 
 func New(db, dir string) *Server {
@@ -38,6 +40,7 @@ func New(db, dir string) *Server {
 			remoteState: []byte{},
 			DB:          storage,
 		},
+		broadcastChan: make(chan *memberlistBroadcast, 1000000),
 	}
 }
 
@@ -74,5 +77,21 @@ func (srv *Server) Start(port int, members []string) error {
 	}
 	node := m.LocalNode()
 	log.Printf("Local node info: %s\n", node.String())
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go srv.broadcastMsg()
+	}
+
 	return nil
+}
+
+func (srv *Server) broadcastMsg() {
+	for {
+		select {
+		case item, ok := <-srv.broadcastChan:
+			if ok {
+				broadcastQueue.QueueBroadcast(item)
+			}
+		}
+	}
 }

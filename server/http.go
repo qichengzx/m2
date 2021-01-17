@@ -35,11 +35,10 @@ func (srv *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	broadcastQueue.QueueBroadcast(&memberlistBroadcast{
+	srv.broadcastChan <- &memberlistBroadcast{
 		msg:    b,
-		node:   srv.name,
 		notify: nil,
-	})
+	}
 }
 
 func (srv *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +68,6 @@ func (srv *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
 
 	broadcastQueue.QueueBroadcast(&memberlistBroadcast{
 		msg:    b,
-		node:   srv.name,
 		notify: nil,
 	})
 }
