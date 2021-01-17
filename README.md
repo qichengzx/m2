@@ -61,12 +61,17 @@ Query params expected are `key` and `val`
 ```shell
 # set
 curl "http://localhost:8001/set?key=foo&val=bar"
+# or use post method 
+# curl -d "key=foo&val=bar" http://localhost:8001
+# output:ok
 
 # get
 curl "http://localhost:8002/get?key=foo"
+# output:bar
 
 # delete
 curl "http://localhost:8003/del?key=foo"
+# output:ok
 ```
 
 Storage
@@ -75,3 +80,8 @@ Storage
 m2 support sync.Map and [rocksdb](https://github.com/tecbot/gorocksdb) as storage. default is sync.Map.
 
 so data will be lost when server is down.
+
+License
+---
+
+m2 is under the MIT license. See the LICENSE file for details.
