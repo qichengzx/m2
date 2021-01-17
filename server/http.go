@@ -39,6 +39,7 @@ func (srv *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 		msg:    b,
 		notify: nil,
 	}
+	w.Write([]byte("ok"))
 }
 
 func (srv *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,6 +71,7 @@ func (srv *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
 		msg:    b,
 		notify: nil,
 	})
+	w.Write([]byte("ok"))
 }
 
 func (srv *Server) GetHandler(w http.ResponseWriter, r *http.Request) {

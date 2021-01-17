@@ -18,14 +18,14 @@ type Server struct {
 }
 
 func New(db, dir string) *Server {
-	var storage storage.DB
+	var dbDriver storage.DB
 	switch db {
 	case "rocksdb":
-		storage = rocksdb.New(dir)
+		dbDriver = rocksdb.New(dir)
 		break
 
 	case "syncmap":
-		storage = syncmap.New()
+		dbDriver = syncmap.New()
 		break
 	default:
 		panic(db + " not exist")
@@ -38,7 +38,7 @@ func New(db, dir string) *Server {
 			meta:        []byte{},
 			state:       []byte{},
 			remoteState: []byte{},
-			DB:          storage,
+			DB:          dbDriver,
 		},
 		broadcastChan: make(chan *memberlistBroadcast, 1000000),
 	}
