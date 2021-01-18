@@ -14,6 +14,7 @@ var (
 	port    = flag.Int("port", 8001, "http port")
 	db      = flag.String("db", "syncmap", "db type")
 	dir     = flag.String("dir", "data", "db dir")
+	retry   = flag.Int("retry", 1, "number of retries")
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 	}
 
 	server := server.New(*db, *dir)
-	if err := server.Start(*port, memberList); err != nil {
+	if err := server.Start(*port, *retry, memberList); err != nil {
 		log.Fatalln(err)
 	}
 

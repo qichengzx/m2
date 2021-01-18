@@ -52,7 +52,7 @@ type Payload struct {
 	}
 }
 
-func (srv *Server) Start(port int, members []string) error {
+func (srv *Server) Start(port, retry int, members []string) error {
 	c := memberlist.DefaultLocalConfig()
 	c.BindPort = port + 10000
 	c.Delegate = srv.delegate
@@ -73,7 +73,7 @@ func (srv *Server) Start(port int, members []string) error {
 		NumNodes: func() int {
 			return m.NumMembers()
 		},
-		RetransmitMult: 3,
+		RetransmitMult: retry,
 	}
 	node := m.LocalNode()
 	log.Printf("Local node info: %s\n", node.String())
