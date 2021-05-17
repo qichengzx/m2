@@ -2,89 +2,73 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/dgraph-io/badger"
+	"github.com/qichengzx/m2/fsm"
 	"net/http"
+	"time"
 )
 
-func (srv *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form.Get("key")
 	val := r.Form.Get("val")
-	if key == "" {
-		http.Error(w, "error key is empty", http.StatusOK)
+	if key == "" || val == "" {
+		http.Error(w, "error key or val is empty", http.StatusOK)
 		return
 	}
 
-	byteKey := []byte(key)
-	byteVal := []byte(val)
-	err := srv.delegate.Set(byteKey, byteVal)
+	payload := fsm.Payload{
+		OP:    "SET",
+		Key:   key,
+		Value: val,
+	}
+
+	data, err := json.Marshal(payload)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	b, err := json.Marshal(Payload{
-		Action: "set",
-		Data: struct {
-			Key   []byte
-			Value []byte
-		}{Key: byteKey, Value: byteVal},
-	})
-
-	if err != nil {
+	applyFuture := s.raft.Apply(data, 500*time.Millisecond)
+	if err := applyFuture.Error(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	srv.broadcastChan <- &memberlistBroadcast{
-		msg:    b,
-		notify: nil,
+	_, ok := applyFuture.Response().(*fsm.ApplyResponse)
+	if !ok {
+		w.Write([]byte("error raft response"))
+		return
 	}
+
 	w.Write([]byte("ok"))
 }
 
-func (srv *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form.Get("key")
 	if key == "" {
 		http.Error(w, "error key is empty", http.StatusOK)
 		return
 	}
-	byteKey := []byte(key)
-	err := srv.delegate.Delete(byteKey)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	var value = make([]byte, 0)
+	err := s.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err != nil {
+			return err
+		}
 
-	b, err := json.Marshal(Payload{
-		Action: "del",
-		Data: struct {
-			Key   []byte
-			Value []byte
-		}{Key: byteKey, Value: nil}})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		value, err = item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
 
-	broadcastQueue.QueueBroadcast(&memberlistBroadcast{
-		msg:    b,
-		notify: nil,
+		return nil
 	})
-	w.Write([]byte("ok"))
-}
 
-func (srv *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	key := r.Form.Get("key")
-	if key == "" {
-		http.Error(w, "error key is empty", http.StatusOK)
-		return
-	}
-	val, err := srv.delegate.Get([]byte(key))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(val)
+	w.Write(value)
 }

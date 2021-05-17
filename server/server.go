@@ -1,97 +1,18 @@
 package server
 
 import (
-	"github.com/hashicorp/memberlist"
-	"github.com/qichengzx/m2/storage"
-	"github.com/qichengzx/m2/storage/rocksdb"
-	"github.com/qichengzx/m2/storage/syncmap"
-	"log"
-	"runtime"
-	"strconv"
-	"sync"
+	"github.com/dgraph-io/badger"
+	"github.com/hashicorp/raft"
 )
 
 type Server struct {
-	delegate      *delegate
-	name          string
-	broadcastChan chan *memberlistBroadcast
+	raft *raft.Raft
+	db   *badger.DB
 }
 
-func New(db, dir string) *Server {
-	var dbDriver storage.DB
-	switch db {
-	case "rocksdb":
-		dbDriver = rocksdb.New(dir)
-		break
-
-	case "syncmap":
-		dbDriver = syncmap.New()
-		break
-	default:
-		panic(db + " not exist")
-	}
-
+func New(raft *raft.Raft, db *badger.DB) *Server {
 	return &Server{
-		name: "",
-		delegate: &delegate{
-			RWMutex:     sync.RWMutex{},
-			meta:        []byte{},
-			state:       []byte{},
-			remoteState: []byte{},
-			DB:          dbDriver,
-		},
-		broadcastChan: make(chan *memberlistBroadcast, 1000000),
-	}
-}
-
-type Payload struct {
-	Action string
-	Data   struct {
-		Key   []byte
-		Value []byte
-	}
-}
-
-func (srv *Server) Start(port, retry int, members []string) error {
-	c := memberlist.DefaultLocalConfig()
-	c.BindPort = port + 10000
-	c.Delegate = srv.delegate
-	c.Events = &event{}
-	c.Name = hostname + "-" + strconv.Itoa(port)
-
-	m, err := memberlist.Create(c)
-	if err != nil {
-		return err
-	}
-	if len(members) > 0 {
-		_, err := m.Join(members)
-		if err != nil {
-			return err
-		}
-	}
-	broadcastQueue = &memberlist.TransmitLimitedQueue{
-		NumNodes: func() int {
-			return m.NumMembers()
-		},
-		RetransmitMult: retry,
-	}
-	node := m.LocalNode()
-	log.Printf("Local node info: %s\n", node.String())
-
-	for i := 0; i < runtime.NumCPU(); i++ {
-		go srv.broadcastMsg()
-	}
-
-	return nil
-}
-
-func (srv *Server) broadcastMsg() {
-	for {
-		select {
-		case item, ok := <-srv.broadcastChan:
-			if ok {
-				broadcastQueue.QueueBroadcast(item)
-			}
-		}
+		raft: raft,
+		db:   db,
 	}
 }
