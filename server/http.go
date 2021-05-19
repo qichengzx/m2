@@ -18,7 +18,7 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := fsm.Payload{
-		OP:    "SET",
+		OP:    fsm.CMDSET,
 		Key:   key,
 		Value: val,
 	}
@@ -71,4 +71,36 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(value)
+}
+
+func (s *Server) DelHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	key := r.Form.Get("key")
+	if key == "" {
+		http.Error(w, "error key is empty", http.StatusOK)
+		return
+	}
+	payload := fsm.Payload{
+		OP:  fsm.CMDDEL,
+		Key: key,
+	}
+
+	data, err := json.Marshal(payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	applyFuture := s.raft.Apply(data, 500*time.Millisecond)
+	if err := applyFuture.Error(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, ok := applyFuture.Response().(*fsm.ApplyResponse)
+	if !ok {
+		w.Write([]byte("error raft response"))
+		return
+	}
+	w.Write([]byte("ok"))
 }

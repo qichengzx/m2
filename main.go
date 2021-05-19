@@ -92,6 +92,7 @@ func main() {
 	http.HandleFunc("/raft/join", server.RaftJoin)
 	http.HandleFunc("/set", server.SetHandler)
 	http.HandleFunc("/get", server.GetHandler)
+	http.HandleFunc("/del", server.DelHandler)
 	fmt.Println("HTTP Server Listening on:", *port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
 		log.Fatalln(err)
