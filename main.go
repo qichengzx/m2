@@ -23,7 +23,7 @@ const (
 var (
 	nodeID   = flag.String("node_id", "node_1", "raft node id")
 	port     = flag.Int("port", 8001, "http port")
-	raftport = flag.String("raft_port", "18001", "raft port")
+	raftaddr = flag.String("raft_addr", "18001", "raft addr")
 	dir      = flag.String("store_dir", "data", "db dir")
 )
 
@@ -61,13 +61,12 @@ func main() {
 		return
 	}
 
-	raftAddr := fmt.Sprintf("127.0.0.1:%s", *raftport)
-	tcpAddr, err := net.ResolveTCPAddr("tcp", raftAddr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", *raftaddr)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	transport, err := raft.NewTCPTransport(raftAddr, tcpAddr, 3, tcpTimeout, os.Stdout)
+	transport, err := raft.NewTCPTransport(*raftaddr, tcpAddr, 3, tcpTimeout, os.Stdout)
 	if err != nil {
 		log.Fatal(err)
 		return
