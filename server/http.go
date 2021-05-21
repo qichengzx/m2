@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/qichengzx/m2/fsm"
 	"net/http"
 	"time"

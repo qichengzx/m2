@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/hashicorp/raft"
 )
 

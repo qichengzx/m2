@@ -3,7 +3,7 @@ package fsm
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/hashicorp/raft"
 	"io"
 	"os"
@@ -101,6 +101,7 @@ func (b badgerFSM) Snapshot() (raft.FSMSnapshot, error) {
 }
 
 func (b badgerFSM) Restore(rc io.ReadCloser) error {
+	defer rc.Close()
 	total := 0
 	decoder := json.NewDecoder(rc)
 	for decoder.More() {
