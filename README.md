@@ -32,8 +32,9 @@ Key/Value Api
 ---
 
 HTTP API
-- /set - set value
+- /set - set key&value
 - /get - get value
+- /del - del key
 
 Query params expected are `key` and `val`
 
@@ -47,6 +48,10 @@ curl "http://localhost:8001/set?key=foo&val=bar"
 # get
 curl "http://localhost:8002/get?key=foo"
 # output:bar
+
+# del
+curl "http://localhost:8001/del?key=foo"
+# output:ok
 
 ```
 
