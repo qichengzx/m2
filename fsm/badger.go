@@ -101,31 +101,6 @@ func (b badgerFSM) Snapshot() (raft.FSMSnapshot, error) {
 }
 
 func (b badgerFSM) Restore(rc io.ReadCloser) error {
-	defer rc.Close()
-	total := 0
-	decoder := json.NewDecoder(rc)
-	for decoder.More() {
-		var data = &Payload{}
-		err := decoder.Decode(data)
-		if err != nil {
-			fmt.Fprintf(os.Stdout, "decode data error%s\n", err.Error())
-			return err
-		}
-
-		if err := b.set(data.Key, data.Value); err != nil {
-			fmt.Fprintf(os.Stdout, "persist data error%s\n", err.Error())
-			return err
-		}
-		total++
-	}
-
-	_, err := decoder.Token()
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "decoder error %s\n", err.Error())
-		return err
-	}
-
-	fmt.Fprintf(os.Stdout, "restore success, total: %d\n", total)
 	return nil
 }
 

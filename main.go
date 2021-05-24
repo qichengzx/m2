@@ -18,6 +18,8 @@ import (
 
 const (
 	tcpTimeout = 1 * time.Second
+	snapInterval = 10 * time.Second
+	snapThreshold = 100
 )
 
 var (
@@ -32,7 +34,8 @@ func main() {
 
 	raftConf := raft.DefaultConfig()
 	raftConf.LocalID = raft.ServerID(*nodeID)
-	raftConf.SnapshotThreshold = 1024
+	raftConf.SnapshotInterval = snapInterval
+	raftConf.SnapshotThreshold = snapThreshold
 
 	badgerOpt := badger.DefaultOptions(*dir)
 	badgerDB, err := badger.Open(badgerOpt)
