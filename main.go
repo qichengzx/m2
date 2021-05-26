@@ -18,8 +18,8 @@ import (
 
 const (
 	tcpTimeout = 1 * time.Second
-	snapInterval = 10 * time.Second
-	snapThreshold = 100
+	snapInterval = 30 * time.Second
+	snapThreshold = 1000
 )
 
 var (
@@ -92,6 +92,8 @@ func main() {
 
 	server := server.New(raftServer, badgerDB)
 	http.HandleFunc("/raft/join", server.RaftJoin)
+	http.HandleFunc("/raft/status", server.RaftStatus)
+	http.HandleFunc("/raft/leave", server.RaftLeave)
 	http.HandleFunc("/set", server.SetHandler)
 	http.HandleFunc("/get", server.GetHandler)
 	http.HandleFunc("/del", server.DelHandler)
