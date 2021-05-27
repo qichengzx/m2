@@ -42,7 +42,7 @@ Query params expected are `key` and `val`
 # set
 curl "http://localhost:8001/set?key=foo&val=bar"
 # or use post method 
-# curl -d "key=foo&val=bar" http://localhost:8001
+# curl -d "key=foo&val=bar" http://localhost:8001/set
 # output:ok
 
 # get
@@ -52,7 +52,50 @@ curl "http://localhost:8002/get?key=foo"
 # del
 curl "http://localhost:8001/del?key=foo"
 # output:ok
+```
 
+Raft Api
+---
+
+HTTP API
+- /raft/join - join raft cluster
+- /raft/leave - leave raft cluster
+- /raft/status - get raft node status
+
+```shell
+# join
+curl "http://localhost:8001/raft/join?nodeid=2&addr=127.0.0.1:18002"
+# or use post method 
+# curl -d "nodeid=2&addr=127.0.0.1:18002" http://localhost:8001/raft/join
+# output:ok
+
+# leave
+curl "http://localhost:8001/raft/leave?nodeid=2&addr=127.0.0.1:18002"
+# output:removed successfully
+
+# node status
+curl "http://localhost:8001/raft/status"
+# output:
+{
+    "applied_index": "2",
+    "commit_index": "2",
+    "fsm_pending": "0",
+    "last_contact": "0",
+    "last_log_index": "2",
+    "last_log_term": "2",
+    "last_snapshot_index": "0",
+    "last_snapshot_term": "0",
+    "latest_configuration": "[{Suffrage:Voter ID:1 Address:127.0.0.1:18001}]",
+    "latest_configuration_index": "0",
+    "num_peers": "0",
+    "protocol_version": "3",
+    "protocol_version_max": "3",
+    "protocol_version_min": "0",
+    "snapshot_version_max": "1",
+    "snapshot_version_min": "0",
+    "state": "Leader",
+    "term": "2"
+}
 ```
 
 Storage
