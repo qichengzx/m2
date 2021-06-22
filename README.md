@@ -19,7 +19,7 @@ Start first node
 ./m2 --node_id 1 --port 8001 --raft_port 18001
 ```
 
-then, start second node with first node as part of the member list:
+then, start second node
 ```shell
 ./m2 --node_id 2 --port 8002 --raft_port 18002
 ```
