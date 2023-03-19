@@ -3,22 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/dgraph-io/badger/v3"
-	"github.com/hashicorp/raft"
-	"github.com/hashicorp/raft-boltdb"
-	"github.com/qichengzx/m2/fsm"
-	"github.com/qichengzx/m2/server"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/dgraph-io/badger/v4"
+	"github.com/hashicorp/raft"
+	raftboltdb "github.com/hashicorp/raft-boltdb"
+	"github.com/qichengzx/m2/fsm"
+	"github.com/qichengzx/m2/server"
 )
 
 const (
-	tcpTimeout = 1 * time.Second
-	snapInterval = 30 * time.Second
+	tcpTimeout    = 1 * time.Second
+	snapInterval  = 30 * time.Second
 	snapThreshold = 1000
 )
 

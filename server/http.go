@@ -2,10 +2,11 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/dgraph-io/badger/v3"
-	"github.com/qichengzx/m2/fsm"
 	"net/http"
 	"time"
+
+	"github.com/dgraph-io/badger/v4"
+	"github.com/qichengzx/m2/fsm"
 )
 
 func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {

@@ -3,10 +3,11 @@ package fsm
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgraph-io/badger/v3"
-	"github.com/hashicorp/raft"
 	"io"
 	"os"
+
+	"github.com/dgraph-io/badger/v4"
+	"github.com/hashicorp/raft"
 )
 
 const (
